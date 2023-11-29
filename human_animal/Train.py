@@ -69,7 +69,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 #Training the model
-epochs = 10
+epochs = 2
 history = model.fit(
   train_ds,
   validation_data=val_ds,
@@ -97,6 +97,7 @@ plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
 plt.show()
+model.save("./human_animal/model.keras")
 
 
 test_img_path= "C:/Users/admin/Desktop/AI_TEST/Lions.jpg"
