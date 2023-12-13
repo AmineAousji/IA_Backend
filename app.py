@@ -1,29 +1,24 @@
-import face_recognition as fr
+from flask import Flask, jsonify, request
 import os
 import cv2
+import face_recognition as fr
 import face_recognition
 import numpy as np
-from time import sleep
+import matplotlib.pyplot as plt
+from flask_cors import CORS
+
+
+
+app = Flask(__name__)
+CORS(app)
 
 root_path = 'faces'
 dir_names = os.listdir(root_path)
 
-# def get_encoded_faces():
-#     encoded = {}
-#     for fnames in dir_names:
-#         #print(fnames)
-#         persons_dir = os.path.join(root_path, fnames)
-#         for f in os.listdir(persons_dir):
-#             #print(f)
-#             if f.endswith(".jpg") or f.endswith(".png"):
-#                 face = fr.load_image_file('faces/' + fnames + '/' + f)
-#                 encoding = fr.face_encodings(face)[0]
-#                 encoded[fnames] = encoding
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
 
-#     return encoded
 
 def get_encoded_faces():
- 
     encoded = {}
     for fnames in dir_names:
         #print(fnames)
@@ -39,19 +34,16 @@ def get_encoded_faces():
                     encodings.append(encoding[0])
         if encodings:  
             encoded[fnames] = encodings
-    #print (encoded)
+    print (encoded)
 
     return encoded
 
 
-
 def unknown_image_encoded(img):
-   
     face = fr.load_image_file("faces/" + img)
     encoding = fr.face_encodings(face)[0]
 
     return encoding
-
 
 def classify_face(im):
     faces_encoded = []
@@ -106,4 +98,42 @@ def classify_face(im):
             return face_names 
 
 
-print(classify_face("test.jpg"))
+@app.route('/recognize', methods=['POST'])
+def recognize_face():
+    try:
+        # Print request headers and body for debugging
+        # print("Request Headers:", request.headers)
+        # print("Request Body:", request.get_data(as_text=True))
+
+        # Get the image file from the request
+        image_file = request.files.get('image')
+
+        if image_file:
+            print(image_file)
+            # Save the image temporarily
+            image_path = 'temp.jpg'
+            image_file.save(image_path)
+
+            # Display the created image using matplotlib for debugging
+            image = cv2.imread(image_path)
+            plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            # plt.show()
+
+            # print(request.files)
+
+            print('test')
+
+            # Call your face recognition function
+            result = classify_face(image_path)
+            print("RESULTAT: ",result)
+
+            # Return the result as JSON
+            return jsonify({'result': result})
+        else:
+            return jsonify({'error': 'No image file received'})
+
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=5000)
