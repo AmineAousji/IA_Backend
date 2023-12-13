@@ -93,9 +93,9 @@ def classify_face(im):
 
 
     while True:
-        cv2.imshow('Video', img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            return face_names 
+        # cv2.imshow('Video', img)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        return face_names 
 
 
 @app.route('/recognize', methods=['POST'])
