@@ -19,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # require tensorflow==2.12
-class_names = ['Animals,''Humans' ]
+class_names = ['Animals','Humans' ]
 animal_names = ['BEAR', 'CATS', 'CHEETAH', 'COW', 'CROCODILES', 'DEER', 'DOGS', 'ELEPHANT', 'GIRAFFE', 'GOAT', 'HIPPOPOTAMUS', 'HORSE', 'KANGAROO', 'LION', 'MEERKAT', 'MONKEY', 'MOOSE', 'OSTRICH', 'PANDA', 'PENGUINS', 'PORCUPINE', 'RABBIT', 'RHINO', 'SNAKE', 'SQUIREL', 'TIGER', 'TORTOISE', 'WALRUS', 'WOLF', 'ZEBRA']
 model = keras.models.load_model('.\human_animal\human_animal\model.keras')
 hora = keras.models.load_model('.\human_animal\hora.keras')
