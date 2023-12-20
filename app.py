@@ -6,7 +6,23 @@ import face_recognition
 import numpy as np
 import matplotlib.pyplot as plt
 from flask_cors import CORS
+import keras
+from keras.layers import Input, Lambda, Dense, Flatten,Dropout,Conv2D,Rescaling,MaxPooling2D
+from keras.models import Model
+from keras.applications.vgg19 import VGG19
+from keras.applications.vgg19 import preprocess_input
+from keras.preprocessing import image
+from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
 
+# require tensorflow==2.12
+class_names = ['Animals,''Humans' ]
+animal_names = ['BEAR', 'CATS', 'CHEETAH', 'COW', 'CROCODILES', 'DEER', 'DOGS', 'ELEPHANT', 'GIRAFFE', 'GOAT', 'HIPPOPOTAMUS', 'HORSE', 'KANGAROO', 'LION', 'MEERKAT', 'MONKEY', 'MOOSE', 'OSTRICH', 'PANDA', 'PENGUINS', 'PORCUPINE', 'RABBIT', 'RHINO', 'SNAKE', 'SQUIREL', 'TIGER', 'TORTOISE', 'WALRUS', 'WOLF', 'ZEBRA']
+model = keras.models.load_model('.\human_animal\human_animal\model.keras')
+hora = keras.models.load_model('.\human_animal\hora.keras')
 
 
 app = Flask(__name__)
@@ -113,22 +129,47 @@ def recognize_face():
             # Save the image temporarily
             image_path = 'temp.jpg'
             image_file.save(image_path)
+            print('Path of image',image_path)
+            img = tf.keras.utils.load_img(
+            image_path, target_size=(180,180)
+            )
+            #
+            print('Type of image',type(img))
 
-            # Display the created image using matplotlib for debugging
-            image = cv2.imread(image_path)
-            plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            # plt.show()
+            img_array = tf.keras.utils.img_to_array(img)
+            img_array = tf.expand_dims(img_array, 0)
+            print('Image array',img_array)
+            print('Analysis of image')
+            predictions = hora.predict(img_array)
+            print('Image has been analysed')
+            score = tf.nn.softmax(predictions[0])
+            print('Score of image calculated',score)
+            print(class_names[np.argmax(score)])
+            if class_names[np.argmax(score)] == 'Animals':
+                animal = model.predict(img_array)
+                print('Image has been analysed')
+                score = tf.nn.softmax(animal[0])
+                print('Score of image calculated',score)
+                print(animal_names[np.argmax(score)])
+                print("This image most likely belongs to {} with a {:.2f} percent confidence."
+                .format(animal_names[np.argmax(score)], 100 * np.max(score)))
+                return jsonify({'result': [animal_names[np.argmax(score)]]})
+            else:
+                # Display the created image using matplotlib for debugging
+                image = cv2.imread(image_path)
+                plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+                # plt.show()
 
-            # print(request.files)
+                # print(request.files)
 
-            print('test')
+                print('test')
 
-            # Call your face recognition function
-            result = classify_face(image_path)
-            print("RESULTAT: ",result)
+                # Call your face recognition function
+                result = classify_face(image_path)
+                print("RESULTAT: ",result)
 
-            # Return the result as JSON
-            return jsonify({'result': result})
+                # Return the result as JSON
+                return jsonify({'result': result})
         else:
             return jsonify({'error': 'No image file received'})
 
