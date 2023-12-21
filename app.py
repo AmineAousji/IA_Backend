@@ -17,9 +17,10 @@ from keras.models import Sequential
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 # require tensorflow==2.12
-class_names = ['Animals,''Humans' ]
+class_names = ['Animals','Humans' ]
 animal_names = ['BEAR', 'CATS', 'CHEETAH', 'COW', 'CROCODILES', 'DEER', 'DOGS', 'ELEPHANT', 'GIRAFFE', 'GOAT', 'HIPPOPOTAMUS', 'HORSE', 'KANGAROO', 'LION', 'MEERKAT', 'MONKEY', 'MOOSE', 'OSTRICH', 'PANDA', 'PENGUINS', 'PORCUPINE', 'RABBIT', 'RHINO', 'SNAKE', 'SQUIREL', 'TIGER', 'TORTOISE', 'WALRUS', 'WOLF', 'ZEBRA']
 model = keras.models.load_model('.\human_animal\human_animal\model.keras')
 hora = keras.models.load_model('.\human_animal\hora.keras')
@@ -34,25 +35,25 @@ dir_names = os.listdir(root_path)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
 
 
-def get_encoded_faces():
-    encoded = {}
-    for fnames in dir_names:
-        #print(fnames)
-        persons_dir = os.path.join(root_path, fnames)
-        encodings = []
-        for f in os.listdir(persons_dir):
-            #print(f)
-            if f.endswith(".jpg") or f.endswith(".png"):
-                face = fr.load_image_file('faces/' + fnames + '/' + f)
-                encoding = fr.face_encodings(face)
-                #encoded[fnames] = encoding
-                if encoding: 
-                    encodings.append(encoding[0])
-        if encodings:  
-            encoded[fnames] = encodings
-    print (encoded)
+# def get_encoded_faces():
+#     encoded = {}
+#     for fnames in dir_names:
+#         #print(fnames)
+#         persons_dir = os.path.join(root_path, fnames)
+#         encodings = []
+#         for f in os.listdir(persons_dir):
+#             #print(f)
+#             if f.endswith(".jpg") or f.endswith(".png"):
+#                 face = fr.load_image_file('faces/' + fnames + '/' + f)
+#                 encoding = fr.face_encodings(face)
+#                 #encoded[fnames] = encoding
+#                 if encoding: 
+#                     encodings.append(encoding[0])
+#         if encodings:  
+#             encoded[fnames] = encodings
+#     print (encoded)
+#     return encoded
 
-    return encoded
 
 
 def unknown_image_encoded(img):
@@ -63,7 +64,9 @@ def unknown_image_encoded(img):
 
 def classify_face(im):
     faces_encoded = []
-    faces = get_encoded_faces()
+    with open('Train.json', 'r') as json_file:
+        faces = json.load(json_file)
+    #faces = get_encoded_faces()
     faces_encode = list(faces.values())
     for face in range(len(faces_encode)):
         for f in faces_encode[face]:
@@ -93,7 +96,7 @@ def classify_face(im):
         print("index: ")
         print(best_match_index)
         if matches[best_match_index]:
-            best_match_index = best_match_index // 2
+            best_match_index = best_match_index // 3
             name = known_face_names[best_match_index]
 
         face_names.append(name)
